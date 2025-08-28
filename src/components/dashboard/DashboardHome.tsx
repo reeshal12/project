@@ -1,60 +1,115 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { AIInsightCard } from './AIInsightCard';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
-import { 
-  DollarSign, 
-  Heart, 
-  AlertTriangle, 
-  Users,
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { useAuth } from "../../contexts/AuthContext";
+import { AIInsightCard } from "./AIInsightCard";
+import { Card } from "../ui/Card";
+import { Button } from "../ui/Button";
+import { CohereClient } from "cohere-ai";
+import {
+  DollarSign,
+  Heart,
+  AlertTriangle,
   ShoppingCart,
   Target,
   TrendingUp,
-  Calendar
-} from 'lucide-react';
+  Calendar,
+  FileText,
+  Bot,
+} from "lucide-react";
+
+// ✅ Initialize Cohere Client
+const cohere = new CohereClient({
+  token: import.meta.env.VITE_COHERE_API_KEY,
+});
 
 export const DashboardHome: React.FC = () => {
   const { user } = useAuth();
+  const [advisorInput, setAdvisorInput] = useState("");
+  const [advisorResponse, setAdvisorResponse] = useState("");
+  const [loadingAdvisor, setLoadingAdvisor] = useState(false);
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [docInsights, setDocInsights] = useState("");
+  const [loadingDoc, setLoadingDoc] = useState(false);
 
   const insights = [
     {
-      title: 'Revenue Forecast',
-      value: '$47,250',
+      title: "Revenue Forecast",
+      value: "$47,250",
       change: 12.5,
       icon: DollarSign,
-      color: 'green' as const
+      color: "green" as const,
     },
     {
-      title: 'Customer Sentiment',
-      value: '4.8/5.0',
+      title: "Customer Sentiment",
+      value: "4.8/5.0",
       change: 8.2,
       icon: Heart,
-      color: 'blue' as const
+      color: "blue" as const,
     },
     {
-      title: 'Inventory Alert',
-      value: '3 Items',
+      title: "Inventory Alert",
+      value: "3 Items",
       change: -5.1,
       icon: AlertTriangle,
-      color: 'yellow' as const
-    }
-  ];
-
-  const recentActivities = [
-    { action: 'New customer registration', time: '2 minutes ago', type: 'user' },
-    { action: 'Product listing updated', time: '15 minutes ago', type: 'product' },
-    { action: 'Campaign performance report', time: '1 hour ago', type: 'campaign' },
-    { action: 'Inventory sync completed', time: '2 hours ago', type: 'inventory' }
+      color: "yellow" as const,
+    },
   ];
 
   const quickActions = [
-    { title: 'Add Product', icon: ShoppingCart, href: '/products/add' },
-    { title: 'Create Campaign', icon: Target, href: '/campaigns/create' },
-    { title: 'View Analytics', icon: TrendingUp, href: '/analytics' },
-    { title: 'Schedule Meeting', icon: Calendar, href: '/meetings' }
+    { title: "Add Product", icon: ShoppingCart, href: "/products/add" },
+    { title: "Create Campaign", icon: Target, href: "/campaigns/create" },
+    { title: "View Analytics", icon: TrendingUp, href: "/analytics" },
+    { title: "Schedule Meeting", icon: Calendar, href: "/meetings" },
   ];
+
+  // ✅ Business Advisor using Cohere AI
+  const handleAdvisor = async () => {
+    if (!advisorInput.trim()) return;
+    setLoadingAdvisor(true);
+    setAdvisorResponse("");
+
+    try {
+      const response = await cohere.generate({
+        model: "command-r-plus",
+        prompt: `You are an experienced business consultant. Give actionable, practical, and concise advice for this query:\n\n"${advisorInput}"\n\nAdvice:`,
+        maxTokens: 200,
+        temperature: 0.7,
+      });
+
+      setAdvisorResponse(response.generations[0].text.trim());
+    } catch (error) {
+      console.error("Cohere API Error:", error);
+      setAdvisorResponse("⚠️ Could not generate advice. Please try again.");
+    }
+
+    setLoadingAdvisor(false);
+  };
+
+  // ✅ Document Insights using Cohere AI
+  const handleDocument = async () => {
+    if (!selectedFile) return;
+    setLoadingDoc(true);
+    setDocInsights("");
+
+    try {
+      const text = await selectedFile.text();
+
+      const response = await cohere.summarize({
+        model: "summarize-xlarge",
+        text: text.slice(0, 1000), // Prevents token limit issues
+        length: "medium",
+        extractiveness: "medium",
+      });
+
+      setDocInsights(response.summary ?? "");
+    } catch (error) {
+      console.error("Cohere Summarization Error:", error);
+      setDocInsights("⚠️ Could not extract insights. Try again.");
+    }
+
+    setLoadingDoc(false);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -69,12 +124,10 @@ export const DashboardHome: React.FC = () => {
             Welcome back, {user?.name}! 👋
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Here's what's happening with {user?.businessName || 'your business'} today
+            Here's what's happening with {user?.businessName || "your business"} today
           </p>
         </div>
-        <Button variant="primary">
-          View Full Report
-        </Button>
+        <Button variant="primary">View Full Report</Button>
       </motion.div>
 
       {/* AI Insights */}
@@ -91,97 +144,60 @@ export const DashboardHome: React.FC = () => {
         ))}
       </div>
 
+      {/* Business Advisor + Document Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <motion.button
-                    key={action.title}
-                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary hover:bg-primary/5 transition-all duration-200 group"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Icon className="w-8 h-8 text-primary group-hover:text-primary mb-2" />
-                    <p className="font-medium text-foreground text-sm">{action.title}</p>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Recent Activities */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Recent Activities</h2>
-            <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 * index }}
-                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                >
-                  <div className="w-2 h-2 bg-primary rounded-full" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Performance Overview */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
+        {/* Business Advisor */}
         <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-foreground">Performance Overview</h2>
-            <Button variant="outline" size="sm">
-              Last 30 Days
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">127</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Active Customers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-accent">89%</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Satisfaction Rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-500">34</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Products Listed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-500">12</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Active Campaigns</div>
-            </div>
-          </div>
+          <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Bot className="w-5 h-5 text-primary" /> Business Advisor
+          </h2>
+          <textarea
+            value={advisorInput}
+            onChange={(e) => setAdvisorInput(e.target.value)}
+            placeholder="Ask me anything about your business..."
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            rows={3}
+          />
+          <Button
+            onClick={handleAdvisor}
+            variant="primary"
+            className="mt-3"
+            disabled={loadingAdvisor}
+          >
+            {loadingAdvisor ? "Thinking..." : "Get Advice"}
+          </Button>
+          {advisorResponse && (
+            <p className="mt-4 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+              {advisorResponse}
+            </p>
+          )}
         </Card>
-      </motion.div>
+
+        {/* Document Insights */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-primary" /> Document Insights
+          </h2>
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx,.txt"
+            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            className="w-full mb-3"
+          />
+          <Button
+            onClick={handleDocument}
+            variant="primary"
+            disabled={!selectedFile || loadingDoc}
+          >
+            {loadingDoc ? "Analyzing..." : "Extract Insights"}
+          </Button>
+          {docInsights && (
+            <p className="mt-4 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+              {docInsights}
+            </p>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };
