@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -79,6 +80,7 @@ const mockCampaigns: Campaign[] = [
 ];
 
 export const CampaignsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [campaigns] = useState<Campaign[]>(mockCampaigns);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -121,14 +123,14 @@ export const CampaignsPage: React.FC = () => {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Campaigns</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('campaigns.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage your marketing campaigns and track performance
+            {t('campaigns.subtitle')}
           </p>
         </div>
         <Button variant="primary" className="flex items-center space-x-2">
           <Plus className="w-4 h-4" />
-          <span>Create Campaign</span>
+          <span>{t('campaigns.createCampaign')}</span>
         </Button>
       </motion.div>
 
@@ -138,7 +140,7 @@ export const CampaignsPage: React.FC = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
             type="text"
-            placeholder="Search campaigns..."
+            placeholder={t('campaigns.searchCampaigns')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-12"
@@ -149,10 +151,10 @@ export const CampaignsPage: React.FC = () => {
       {/* Campaign Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: 'Total Campaigns', value: '12', icon: Megaphone, color: 'blue' },
-          { label: 'Active Campaigns', value: '8', icon: Play, color: 'green' },
-          { label: 'Total Reach', value: '138K', icon: Users, color: 'purple' },
-          { label: 'Total Spent', value: '$8.35K', icon: DollarSign, color: 'red' }
+          { label: t('campaigns.totalCampaigns'), value: '12', icon: Megaphone, color: 'blue' },
+          { label: t('campaigns.activeCampaigns'), value: '8', icon: Play, color: 'green' },
+          { label: t('campaigns.totalReach'), value: '138K', icon: Users, color: 'purple' },
+          { label: t('campaigns.totalSpent'), value: '$8.35K', icon: DollarSign, color: 'red' }
         ].map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -210,7 +212,7 @@ export const CampaignsPage: React.FC = () => {
                     <div>
                       <div className="flex items-center space-x-1 text-sm text-gray-500 mb-1">
                         <DollarSign className="w-4 h-4" />
-                        <span>Budget</span>
+                        <span>{t('campaigns.budget')}</span>
                       </div>
                       <p className="font-semibold text-foreground">{formatCurrency(campaign.budget)}</p>
                     </div>
@@ -218,7 +220,7 @@ export const CampaignsPage: React.FC = () => {
                     <div>
                       <div className="flex items-center space-x-1 text-sm text-gray-500 mb-1">
                         <TrendingUp className="w-4 h-4" />
-                        <span>Spent</span>
+                        <span>{t('campaigns.spent')}</span>
                       </div>
                       <p className="font-semibold text-foreground">{formatCurrency(campaign.spent)}</p>
                     </div>
@@ -226,7 +228,7 @@ export const CampaignsPage: React.FC = () => {
                     <div>
                       <div className="flex items-center space-x-1 text-sm text-gray-500 mb-1">
                         <Users className="w-4 h-4" />
-                        <span>Reach</span>
+                        <span>{t('campaigns.reach')}</span>
                       </div>
                       <p className="font-semibold text-foreground">{formatNumber(campaign.reach)}</p>
                     </div>
@@ -234,7 +236,7 @@ export const CampaignsPage: React.FC = () => {
                     <div>
                       <div className="flex items-center space-x-1 text-sm text-gray-500 mb-1">
                         <Target className="w-4 h-4" />
-                        <span>Clicks</span>
+                        <span>{t('campaigns.clicks')}</span>
                       </div>
                       <p className="font-semibold text-foreground">{formatNumber(campaign.clicks)}</p>
                     </div>
@@ -242,7 +244,7 @@ export const CampaignsPage: React.FC = () => {
                     <div>
                       <div className="flex items-center space-x-1 text-sm text-gray-500 mb-1">
                         <Calendar className="w-4 h-4" />
-                        <span>Platform</span>
+                        <span>{t('campaigns.platform')}</span>
                       </div>
                       <p className="font-semibold text-foreground">{campaign.platform}</p>
                     </div>
@@ -285,16 +287,16 @@ export const CampaignsPage: React.FC = () => {
           className="text-center py-12"
         >
           <Megaphone className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">No campaigns found</h3>
+          <h3 className="text-lg font-medium text-foreground mb-2">{t('campaigns.noCampaignsFound')}</h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {searchTerm 
-              ? 'Try adjusting your search criteria' 
-              : 'Get started by creating your first marketing campaign'
+              ? t('campaigns.adjustSearchCriteria')
+              : t('campaigns.createFirstCampaign')
             }
           </p>
           <Button variant="primary">
             <Plus className="w-4 h-4 mr-2" />
-            Create Campaign
+            {t('campaigns.createCampaign')}
           </Button>
         </motion.div>
       )}

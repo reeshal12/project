@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { LoginPage } from './components/auth/LoginPage';
 import { SignupPage } from './components/auth/SignupPage';
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow';
@@ -49,15 +50,17 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-background text-foreground">
-            <AppContent />
-          </div>
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <div className="min-h-screen bg-background text-foreground">
+              <AppContent />
+            </div>
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </Router>
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -60,6 +61,7 @@ const mockProducts: Product[] = [
 ];
 
 export const ProductsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [products] = useState<Product[]>(mockProducts);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -105,14 +107,14 @@ export const ProductsPage: React.FC = () => {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Products</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t('products.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage your product catalog and inventory
+            {t('products.subtitle')}
           </p>
         </div>
         <Button variant="primary" className="flex items-center space-x-2">
           <Plus className="w-4 h-4" />
-          <span>Add Product</span>
+          <span>{t('products.addProduct')}</span>
         </Button>
       </motion.div>
 
@@ -123,7 +125,7 @@ export const ProductsPage: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder={t('products.searchProducts')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-12"
@@ -137,10 +139,10 @@ export const ProductsPage: React.FC = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="low_stock">Low Stock</option>
-              <option value="inactive">Inactive</option>
+              <option value="all">{t('products.allStatus')}</option>
+              <option value="active">{t('products.active')}</option>
+              <option value="low_stock">{t('products.lowStock')}</option>
+              <option value="inactive">{t('products.inactive')}</option>
             </select>
           </div>
         </div>
@@ -184,13 +186,13 @@ export const ProductsPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-2xl font-bold text-primary">${product.price}</p>
-                    <p className="text-sm text-gray-500">Stock: {product.stock} units</p>
+                    <p className="text-sm text-gray-500">{t('products.stock')}: {product.stock} {t('products.units')}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500">
-                    Updated {product.lastUpdated}
+                    {t('products.updated')} {product.lastUpdated}
                   </span>
                   
                   <div className="flex items-center space-x-2">
@@ -218,16 +220,16 @@ export const ProductsPage: React.FC = () => {
           className="text-center py-12"
         >
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">No products found</h3>
+          <h3 className="text-lg font-medium text-foreground mb-2">{t('products.noProductsFound')}</h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {searchTerm || selectedStatus !== 'all' 
-              ? 'Try adjusting your search or filter criteria' 
-              : 'Get started by adding your first product'
+              ? t('products.adjustSearch')
+              : t('products.getStarted')
             }
           </p>
           <Button variant="primary">
             <Plus className="w-4 h-4 mr-2" />
-            Add Product
+            {t('products.addProduct')}
           </Button>
         </motion.div>
       )}

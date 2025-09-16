@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -10,7 +11,6 @@ import {
   Bell, 
   Shield, 
   Palette, 
-  Globe, 
   CreditCard,
   Save,
   Moon,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
+  const { t } = useLanguage();
   const { user, updateUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('profile');
@@ -30,11 +31,11 @@ export const SettingsPage: React.FC = () => {
   });
 
   const tabs = [
-    { id: 'profile', name: 'Profile', icon: User },
-    { id: 'notifications', name: 'Notifications', icon: Bell },
-    { id: 'security', name: 'Security', icon: Shield },
-    { id: 'appearance', name: 'Appearance', icon: Palette },
-    { id: 'billing', name: 'Billing', icon: CreditCard }
+    { id: 'profile', name: t('settings.profile'), icon: User },
+    { id: 'notifications', name: t('settings.notifications'), icon: Bell },
+    { id: 'security', name: t('settings.security'), icon: Shield },
+    { id: 'appearance', name: t('settings.appearance'), icon: Palette },
+    { id: 'billing', name: t('settings.billing'), icon: CreditCard }
   ];
 
   const handleSave = () => {
@@ -48,32 +49,32 @@ export const SettingsPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Profile Information</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('settings.profileInformation')}</h3>
               <div className="space-y-4">
                 <Input
-                  label="Full Name"
+                  label={t('settings.fullName')}
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 />
                 <Input
-                  label="Email Address"
+                  label={t('settings.emailAddress')}
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 />
                 <Input
-                  label="Business Name"
+                  label={t('settings.businessName')}
                   value={formData.businessName}
                   onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
-                    label="Industry"
+                    label={t('settings.industry')}
                     value={formData.industry}
                     onChange={(e) => setFormData(prev => ({ ...prev, industry: e.target.value }))}
                   />
                   <Input
-                    label="Business Size"
+                    label={t('settings.businessSize')}
                     value={formData.businessSize}
                     onChange={(e) => setFormData(prev => ({ ...prev, businessSize: e.target.value }))}
                   />
@@ -222,9 +223,9 @@ export const SettingsPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t('settings.title')}</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Manage your account preferences and settings
+          {t('settings.subtitle')}
         </p>
       </motion.div>
 
@@ -271,7 +272,7 @@ export const SettingsPage: React.FC = () => {
               <div className="flex justify-end mt-6">
                 <Button variant="primary" onClick={handleSave} className="flex items-center space-x-2">
                   <Save className="w-4 h-4" />
-                  <span>Save Changes</span>
+                  <span>{t('settings.saveChanges')}</span>
                 </Button>
               </div>
             )}
